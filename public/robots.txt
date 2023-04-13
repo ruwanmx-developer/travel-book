@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+<a href="https://www.freepik.com/free-photo/beautiful-girl-sitting-viewpoint-koh-nangyuan-island-near-koh-tao-island-surat-thani-thailand_13249970.htm?query=travel#from_view=detail_alsolike">Image by tawatchai07</a> on Freepik
+Image by <a href="https://www.freepik.com/free-photo/camera-mobile-globe-straw-hat-compass-wooden-plank_2627296.htm#page=2&query=travel%20background&position=37&from_view=keyword&track=ais">Freepik</a>
