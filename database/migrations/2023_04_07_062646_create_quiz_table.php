@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('quiz', function (Blueprint $table) {
             $table->id();
             $table->string('quiz', 1000);
+            $table->integer('status');
             $table->timestamps();
         });
 
@@ -64,6 +65,7 @@ return new class extends Migration
         foreach ($quizes as $quiz) {
             Quiz::create([
                 'quiz' => $quiz,
+                'status' => 1,
             ]);
         }
     }

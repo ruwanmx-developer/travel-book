@@ -16,7 +16,7 @@ class AnswerController extends Controller
     public function quiz()
     {
         $answers = Answer::where('user', '=', Auth::user()->id)->get();
-        $quizes = Quiz::all();
+        $quizes = Quiz::where('status', '=', '1')->get();
         $res = User::find(Auth::user()->id);
         $datetime1 = new DateTime($res->created_at);
         $datetime2 = new DateTime();
@@ -26,12 +26,65 @@ class AnswerController extends Controller
     }
     public function answers()
     {
+        $members = User::where('role', '!=', 'admin')->get();
+        $res = User::find(Auth::user()->id);
+        $def = false;
+        $quizes = Quiz::all();
+        return view('answers', compact('members', 'quizes', 'def'));
+    }
+
+    public function addQuiz(Request $request)
+    {
+        Quiz::create([
+            'quiz' => $request->quiz,
+            'status' => 1
+        ]);
 
         $members = User::where('role', '!=', 'admin')->get();
         $res = User::find(Auth::user()->id);
-        $quizes = false;
-        return view('answers', compact('members', 'quizes'));
+        $def = false;
+        $quizes = Quiz::all();
+        return view('answers', compact('members', 'quizes', 'def'));
     }
+
+    public function editQuiz(Request $request)
+    {
+        $quiz = Quiz::find($request->qid);
+        $quiz->quiz = $request->quiz;
+        $quiz->save();
+
+        $members = User::where('role', '!=', 'admin')->get();
+        $res = User::find(Auth::user()->id);
+        $def = false;
+        $quizes = Quiz::all();
+        return view('answers', compact('members', 'quizes', 'def'));
+    }
+    public function deleteQuiz(Request $request)
+    {
+        $quiz = Quiz::find($request->id);
+        if ($quiz) {
+            $answers = Answer::where('quiz', '=', $quiz->id)->get();
+            if (count($answers) == 0) {
+                Quiz::where('id', '=', $quiz->id)->delete();
+                return response()->json(['state' => true]);
+            }
+        }
+        return response()->json(['state' => false]);
+    }
+    public function stateQuiz(Request $request)
+    {
+        $quiz = Quiz::find($request->id);
+        $quiz->status = $request->state;
+        $quiz->save();
+
+        $members = User::where('role', '!=', 'admin')->get();
+        $res = User::find(Auth::user()->id);
+        $def = false;
+        $quizes = Quiz::all();
+        return view('answers', compact('members', 'quizes', 'def'));
+    }
+
+
     public function answer(int $id)
     {
         $answers = Answer::where('user', '=', $id)->get();
@@ -42,7 +95,8 @@ class AnswerController extends Controller
         $datetime2 = new DateTime();
         $interval = $datetime1->diff($datetime2);
         $canEdit = ($interval->days <= 15) ? true : false;
-        return view('answers', compact('quizes', 'answers', 'canEdit', 'members'));
+        $def = true;
+        return view('answers', compact('quizes', 'answers', 'canEdit', 'members', 'def'));
     }
 
     public function saveAnswer(Request $request)

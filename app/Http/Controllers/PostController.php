@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Answer;
 use App\Models\Comment;
 use App\Models\Like;
 use App\Models\Post;
+use App\Models\Quiz;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +18,18 @@ class PostController extends Controller
 
     public function index(Request $request)
     {
-        return view('new-post');
+
+        $postCount = count(Post::where('uploaded_by', '=', Auth::user()->id)->get());
+
+
+        $quizCount = count(Quiz::where('status', '=', 1)->get());
+
+        $answerCount = Answer::where('user', '=', Auth::user()->id)->get();
+        $state = true;
+        if ($postCount >= 2 && $quizCount > $answerCount) {
+            $state = false;
+        }
+        return view('new-post')->with('state', $state);
     }
     public function savePost(Request $request)
     {
@@ -36,12 +49,13 @@ class PostController extends Controller
         } else {
             $filetype = 1;
         }
-
         Post::Create([
             'description' => $request->description,
             'content_url' => $filename,
             'content_type' => $filetype,
-            'uploaded_by' => Auth::user()->id
+            'uploaded_by' => Auth::user()->id,
+            'lat' => $request->lat,
+            'log' => $request->log,
         ]);
 
         return redirect()->route('feed');
@@ -54,6 +68,22 @@ class PostController extends Controller
         Like::where('post_id', '=', $request->post_id)->delete();
         Comment::where('post', '=', $request->post_id)->delete();
         return response()->json(['deleted' => true]);
+    }
+    public function blockPost(Request $request)
+    {
+        $post = Post::find($request->post);
+        $post->block = $request->content;
+        $post->save();
+
+        return response()->json(['block' => true, 'id' => $request->post, 'reason' => $request->content]);
+    }
+    public function unblockPost(Request $request)
+    {
+        $post = Post::find($request->post);
+        $post->block = "";
+        $post->save();
+
+        return response()->json(['unblock' => true]);
     }
     public function saveComment(Request $request)
     {

@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Stevebauman\Location\Facades\Location;
 
 class PageController extends Controller
 {
@@ -21,12 +22,13 @@ class PageController extends Controller
 
     public function index()
     {
+        // $ip = '103.239.147.187'; //For static IP address get
+
         return view('home');
     }
 
     public function feed()
     {
-
         $posts = Post::with([
             'user' => function ($q) {
                 $q->select('id', 'email', 'name', 'image');

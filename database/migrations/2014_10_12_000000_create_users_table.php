@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('image');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->integer('state')->default(1);
             $table->rememberToken();
             $table->timestamps();
         });
@@ -30,7 +31,8 @@ return new class extends Migration
             'role' => 'admin',
             'email' => 'admin@gmail.com',
             'image' => 'admin.png',
-            'password' => Hash::make('admin123')
+            'password' => Hash::make('admin123'),
+            'state' => 1,
         ]);
     }
 

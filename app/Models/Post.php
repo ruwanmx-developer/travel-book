@@ -16,6 +16,9 @@ class Post extends Model
         'content_url',
         'content_type',
         'uploaded_by',
+        'lat',
+        'log',
+        'block',
     ];
 
     public function user(): BelongsTo

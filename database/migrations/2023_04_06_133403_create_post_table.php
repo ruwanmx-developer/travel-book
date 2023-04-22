@@ -15,6 +15,9 @@ return new class extends Migration
             $table->string('content_url', 100);
             $table->integer('content_type')->unsigned();
             $table->integer('uploaded_by')->unsigned();
+            $table->string('lat', 30);
+            $table->string('log', 30);
+            $table->string('block', 300)->nullable();
             $table->timestamps();
         });
     }

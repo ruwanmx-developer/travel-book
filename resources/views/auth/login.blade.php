@@ -1,6 +1,12 @@
 @extends('layouts.guest')
 
 @section('content')
+    @if (session('error'))
+        <div class="alert alert-danger">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <div class="auth-form-wrap">
         <div class="auth-form">
             <div class="auth-sec">

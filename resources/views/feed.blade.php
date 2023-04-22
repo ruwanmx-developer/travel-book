@@ -4,7 +4,9 @@
 
     <body id="feed">
     @endsection
+
     @include('include.navbar')
+
     @section('content')
         <div class="container">
             <div class="row justify-content-center">
@@ -49,14 +51,15 @@
                             </div>
                         @endif
                         @foreach ($posts as $post)
-                            @include('include.feed-post')
+                            @if ($post->block == null || $post->user->id == Auth::user()->id || Auth::user()->role == 'admin')
+                                @include('include.feed-post')
+                            @endif
                         @endforeach
                     </div>
                 </div>
 
             </div>
         </div>
-
         <script>
             @if (Auth::user()->role == 'admin')
                 function toggleLike(x) {
@@ -151,6 +154,61 @@
                     }
                 }
                 request.open("POST", "{{ route('saveComment') }}");
+                request.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'))
+                request.send(formData);
+            }
+
+            function blockPost(x) {
+
+                let cmt = document.getElementById('block_for_' + x).value;
+
+                let wrap = document.getElementById('block_wrap_' + x);
+
+                let formData = new FormData();
+                formData.append("post", x);
+                formData.append("content", cmt);
+
+                const request = new XMLHttpRequest();
+                request.onreadystatechange = function() {
+                    if (request.readyState == XMLHttpRequest.DONE) {
+                        var data = JSON.parse(request.response)
+                        if (data.block == true) {
+                            var html = '<div class="post-block" id="block_id_' + data.id + '">' +
+                                '<div>' +
+                                '<div>This post is blocked by Admin</div>' +
+                                '<div class="reason">' + data.reason + '</div>' +
+                                '<button class="btn btn-primary mt-2" onclick="unblockPost(' + data.id +
+                                ')">Unblock</button>' +
+                                '</div>' +
+                                '</div>';
+                            wrap.innerHTML = html;
+                            document.getElementById('block_for_' + x).value = "";
+                        }
+                    }
+                }
+                request.open("POST", "{{ route('blockPost') }}");
+                request.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'))
+                request.send(formData);
+            }
+
+            function unblockPost(x) {
+
+                let wrap = document.getElementById('block_wrap_' + x);
+
+                let formData = new FormData();
+                formData.append("post", x);
+
+                const request = new XMLHttpRequest();
+                request.onreadystatechange = function() {
+                    if (request.readyState == XMLHttpRequest.DONE) {
+                        var data = JSON.parse(request.response)
+                        if (data.unblock == true) {
+                            wrap.innerHTML = "";
+                            document.getElementById('block_for_' + x).value = "";
+                        }
+                    }
+                }
+                request.open("POST", "{{ route('unblockPost') }}");
                 request.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'))
                 request.send(formData);
             }
