@@ -11,24 +11,7 @@
                 <div class="col-8 offset-2">
                     <div class="new-post-card mt-5">
                         <div class="form-title">Add New Post</div>
-                        <button type="button" class="btn btn-primary" id="liveToastBtn">Show live toast</button>
-
-                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                                <div class="toast-header">
-                                    <img src="..." class="rounded me-2" alt="...">
-                                    <strong class="me-auto">Bootstrap</strong>
-                                    <small>11 mins ago</small>
-                                    <button type="button" class="btn-close" data-bs-dismiss="toast"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="toast-body">
-                                    Hello, world! This is a toast message.
-                                </div>
-                            </div>
-                        </div>
-
-                        @if ($state)
+                        @if (!$state)
                             <div class="alert alert-danger mt-3" role="alert">
                                 You have to answer the survay questions first to add new posts.
                             </div>
@@ -83,8 +66,30 @@
                     </div>
                 </div>
 
-
+                <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                        data-bs-autohide="false">
+                        <div class="toast-header">
+                            <strong class="me-auto">Survay</strong>
+                            <small>{{ 15 - $dtc4->days }} days to complete</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            Hello <strong>{{ Auth::user()->name }}</strong>, you have
+                            <strong>{{ 15 - $dtc4->days }}</strong> days
+                            to complete the
+                            survay questions on
+                            the site. If you don't fill those <strong>your account will remove after {{ 15 - $dtc4->days }}
+                                days</strong>.
+                        </div>
+                    </div>
+                </div>
                 <script type="text/javascript">
+                    @if ($dtc4->days <= 15 && !$qc3 && Auth::user()->role != 'admin')
+                        const toastLive = document.getElementById('liveToast')
+                        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLive)
+                        toastBootstrap.show()
+                    @endif
                     var map;
 
                     const toastTrigger = document.getElementById('liveToastBtn')

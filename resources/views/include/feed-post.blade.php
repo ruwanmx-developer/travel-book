@@ -13,6 +13,7 @@
                         @else
                             <div>Your post has been blocked by Admin.<br>Only you can see this warning!</div>
                             <div class="reason">{{ $post->block }}</div>
+                            <i class="bi bi-trash3-fill" onclick="deletePost({{ $post->id }})"></i>
                         @endif
                     </div>
                 </div>

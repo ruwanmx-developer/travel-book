@@ -7,7 +7,9 @@ use App\Models\Comment;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\Quiz;
+use App\Models\User;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -19,17 +21,26 @@ class PostController extends Controller
     public function index(Request $request)
     {
 
-        $postCount = count(Post::where('uploaded_by', '=', Auth::user()->id)->get());
+        $dtc1 = User::find(Auth::user()->id);
+        $dtc2 = new DateTime($dtc1->created_at);
+        $dtc3 = new DateTime();
+        $dtc4 = $dtc2->diff($dtc3);
 
+        $qc1 = count(Quiz::where('status', '=', 1)->get());
+        $qc2 = count(Answer::where('user', '=', Auth::user()->id)->get());
+        $qc3 = ($qc1 >= $qc2) ? false : true;
+
+
+        $postCount = count(Post::where('uploaded_by', '=', Auth::user()->id)->get());
 
         $quizCount = count(Quiz::where('status', '=', 1)->get());
 
-        $answerCount = Answer::where('user', '=', Auth::user()->id)->get();
+        $answerCount = count(Answer::where('user', '=', Auth::user()->id)->get());
         $state = true;
-        if ($postCount >= 2 && $quizCount > $answerCount) {
+        if ($postCount >= 2 and  $quizCount > $answerCount) {
             $state = false;
         }
-        return view('new-post')->with('state', $state);
+        return view('new-post')->with('state', $state)->with('dtc4', $dtc4)->with('qc3', $qc3);
     }
     public function savePost(Request $request)
     {

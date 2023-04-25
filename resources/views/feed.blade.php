@@ -9,9 +9,9 @@
 
     @section('content')
         <div class="container">
+
             <div class="row justify-content-center">
                 <div class="col-3">
-
                     <div class="sticky-top left-panel">
                         @if (Auth::user()->role != 'admin')
                             <a class="btn btn-primary w-100 mb-3" href="{{ route('new-post') }}"> <i
@@ -33,11 +33,20 @@
                                 <div class="image">
                                     <img src="{{ URL::asset('uploads/' . $member->image) }}" alt="">
                                 </div>
-                                <div>
+                                <div class="w-100">
                                     <div class="name">
                                         {{ $member->name }}
                                     </div>
                                 </div>
+                                @if (Auth::user()->role == 'admin')
+                                    <div id="member_active_{{ $member->id }}">
+                                        @if ($member->state == '1')
+                                            <i class="bi bi-eye-fill" onclick="blockUser({{ $member->id }})"></i>
+                                        @else
+                                            <i class="bi bi-eye-slash-fill" onclick="unblockUser({{ $member->id }})"></i>
+                                        @endif
+                                    </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -60,7 +69,31 @@
 
             </div>
         </div>
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                data-bs-autohide="false">
+                <div class="toast-header">
+                    <strong class="me-auto">Survay</strong>
+                    <small>{{ 15 - $dtc4->days }} days to complete</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    Hello <strong>{{ Auth::user()->name }}</strong>, you have <strong>{{ 15 - $dtc4->days }}</strong> days
+                    to complete the
+                    survay questions on
+                    the site. If you don't fill those <strong>your account will remove after {{ 15 - $dtc4->days }}
+                        days</strong>.
+                </div>
+            </div>
+        </div>
+
         <script>
+            @if ($dtc4->days <= 15 && !$qc3 && Auth::user()->role != 'admin')
+                const toastLive = document.getElementById('liveToast')
+                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLive)
+                toastBootstrap.show()
+            @endif
+
             @if (Auth::user()->role == 'admin')
                 function toggleLike(x) {
                     return
@@ -211,6 +244,70 @@
                 request.open("POST", "{{ route('unblockPost') }}");
                 request.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'))
                 request.send(formData);
+            }
+
+            function blockUser(x) {
+                let wrap = document.getElementById('member_active_' + x);
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This user won't able to login again!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, block user!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let formData = new FormData();
+                        formData.append("user_id", x);
+
+                        const request = new XMLHttpRequest();
+                        request.onreadystatechange = function() {
+                            if (request.readyState == XMLHttpRequest.DONE) {
+                                var data = JSON.parse(request.response)
+                                if (data.block == true) {
+                                    wrap.innerHTML = '<i class="bi bi-eye-slash-fill" onclick="unblockUser(' + data
+                                        .user + ')"></i>';
+                                }
+                            }
+                        }
+                        request.open("POST", "{{ route('blockUser') }}");
+                        request.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'))
+                        request.send(formData);
+                    }
+                })
+            }
+
+            function unblockUser(x) {
+                let wrap = document.getElementById('member_active_' + x);
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This user will able to login again!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, unblock user!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let formData = new FormData();
+                        formData.append("user_id", x);
+
+                        const request = new XMLHttpRequest();
+                        request.onreadystatechange = function() {
+                            if (request.readyState == XMLHttpRequest.DONE) {
+                                var data = JSON.parse(request.response)
+                                if (data.unblock == true) {
+                                    wrap.innerHTML =
+                                        '<i class="bi bi-eye-fill" onclick="blockUser(' + data.user + ')"></i>';
+                                }
+                            }
+                        }
+                        request.open("POST", "{{ route('unblockUser') }}");
+                        request.setRequestHeader('X-CSRF-TOKEN', $('meta[name="csrf-token"]').attr('content'))
+                        request.send(formData);
+                    }
+                })
             }
         </script>
     @endsection

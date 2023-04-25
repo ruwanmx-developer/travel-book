@@ -41,6 +41,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/state-quiz', [App\Http\Controllers\AnswerController::class, 'stateQuiz'])->name('stateQuiz');
     Route::post('/save-answer', [App\Http\Controllers\AnswerController::class, 'saveAnswer'])->name('saveAnswer');
 
+    Route::post('/block-user', [App\Http\Controllers\PageController::class, 'blockUser'])->name('blockUser');
+    Route::post('/unblock-user', [App\Http\Controllers\PageController::class, 'unblockUser'])->name('unblockUser');
+
     Route::get('/answer/{id}', [App\Http\Controllers\AnswerController::class, 'answer'])->name('answer');
     Route::get('/answers', [App\Http\Controllers\AnswerController::class, 'answers'])->name('answers');
 });
